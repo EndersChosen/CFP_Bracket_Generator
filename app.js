@@ -352,6 +352,7 @@ function setupEventListeners() {
     const generateBtn = document.getElementById('generate-btn');
     const title = document.getElementById('standings-title');
     const manualSelectionCheckbox = document.getElementById('manual-selection');
+    const exportPdfBtn = document.getElementById('export-pdf-btn');
     
     viewMode.addEventListener('change', (e) => {
         currentViewMode = e.target.value;
@@ -393,6 +394,8 @@ function setupEventListeners() {
     });
     
     generateBtn.addEventListener('click', generateBracket);
+    
+    exportPdfBtn.addEventListener('click', exportToPDF);
 }
 
 // Generate bracket based on user selections
@@ -452,6 +455,10 @@ function generateBracket() {
     
     // Render bracket
     renderBracket(bracket, weekCount);
+    
+    // Show export button
+    const exportBtn = document.getElementById('export-pdf-btn');
+    exportBtn.style.display = 'inline-block';
 }
 
 // Create bracket structure with proper tournament seeding
@@ -722,6 +729,28 @@ function selectWinner(element) {
     const teamCount = bracketState[0].length * 2;
     const weeks = bracketState.length;
     renderBracket(bracketState, weeks);
+}
+
+// Export bracket to PDF
+function exportToPDF() {
+    // Show export button is working
+    const exportBtn = document.getElementById('export-pdf-btn');
+    const originalText = exportBtn.textContent;
+    exportBtn.textContent = '📄 Preparing PDF...';
+    exportBtn.disabled = true;
+    
+    // Add print class to body for print-specific styles
+    document.body.classList.add('printing');
+    
+    // Trigger print dialog
+    setTimeout(() => {
+        window.print();
+        
+        // Restore button state
+        exportBtn.textContent = originalText;
+        exportBtn.disabled = false;
+        document.body.classList.remove('printing');
+    }, 100);
 }
 
 // Clear teams from subsequent rounds when a selection changes

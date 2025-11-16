@@ -203,11 +203,47 @@ header p {
     padding: 30px;
 }
 
+.bracket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 20px;
+}
+
 .bracket-section h2 {
     color: #2c5aa0;
-    margin-bottom: 30px;
     font-size: 1.8rem;
+    flex: 1;
     text-align: center;
+    margin: 0;
+}
+
+.export-button {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #28a745 0%, #20833b 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    white-space: nowrap;
+}
+
+.export-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+}
+
+.export-button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.export-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 .bracket-container {
@@ -423,4 +459,111 @@ header p {
 
 .bracket-container::-webkit-scrollbar-thumb:hover {
     background: #1e3c72;
+}
+
+/* Print styles for PDF export */
+@media print {
+    /* Hide everything except the bracket */
+    body {
+        background: white;
+        padding: 0;
+        margin: 0;
+    }
+    
+    header,
+    .controls-section,
+    .export-button {
+        display: none !important;
+    }
+    
+    .container {
+        box-shadow: none;
+        border-radius: 0;
+    }
+    
+    .bracket-section {
+        padding: 20px;
+    }
+    
+    .bracket-header {
+        margin-bottom: 20px;
+    }
+    
+    .bracket-section h2 {
+        color: #000;
+        font-size: 1.5rem;
+        page-break-after: avoid;
+    }
+    
+    .bracket-container {
+        overflow: visible;
+        background: white;
+        padding: 10px;
+        min-height: auto;
+    }
+    
+    .bracket {
+        gap: 40px;
+        padding: 10px;
+        page-break-inside: avoid;
+    }
+    
+    .bracket-round {
+        min-width: 180px;
+        page-break-inside: avoid;
+    }
+    
+    .round-title {
+        color: #000;
+        background: #f0f0f0;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .matchup {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        border: 1px solid #ccc;
+        page-break-inside: avoid;
+    }
+    
+    .team {
+        cursor: default;
+    }
+    
+    .team:hover {
+        background-color: inherit;
+        transform: none;
+    }
+    
+    .seed {
+        background: #333;
+        color: white;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .team.winner {
+        background-color: #e8f5e9;
+        border-left: 4px solid #4caf50;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .winner-indicator {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    /* Connector lines for print */
+    .bracket-round:not(:last-child) .matchup::after {
+        background: #999;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    /* Ensure bracket fits on page */
+    @page {
+        size: landscape;
+        margin: 0.5in;
+    }
 }
