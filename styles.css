@@ -168,6 +168,170 @@ header p {
     border-radius: 4px;
 }
 
+/* Custom list styles */
+#custom-list-container {
+    margin-top: 15px;
+}
+
+.custom-list-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+#custom-item-input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+#custom-item-input:focus {
+    outline: none;
+    border-color: #2c5aa0;
+    box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+}
+
+.add-item-button {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #28a745 0%, #20833b 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    white-space: nowrap;
+}
+
+.add-item-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+}
+
+.add-item-button:active {
+    transform: translateY(0);
+}
+
+.custom-items-list {
+    max-height: 320px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+.placeholder-small {
+    text-align: center;
+    color: #999;
+    padding: 30px 20px;
+    font-size: 0.95rem;
+}
+
+.custom-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: white;
+    border-radius: 6px;
+    border-left: 4px solid #2c5aa0;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.custom-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.custom-item.selectable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.custom-item.selected {
+    background: #e3f2fd;
+    border-left-color: #1976d2;
+    border-left-width: 6px;
+}
+
+.custom-item-rank {
+    font-weight: bold;
+    color: #2c5aa0;
+    font-size: 1.2rem;
+    min-width: 30px;
+}
+
+.custom-item-name {
+    flex: 1;
+    font-weight: 600;
+    color: #333;
+}
+
+.remove-item-btn {
+    width: 28px;
+    height: 28px;
+    background: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.3rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+}
+
+.remove-item-btn:hover {
+    background: #cc0000;
+    transform: scale(1.1);
+}
+
+.custom-list-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.clear-list-button,
+.import-list-button {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.clear-list-button {
+    background: #ff4444;
+    color: white;
+}
+
+.clear-list-button:hover {
+    background: #cc0000;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(255, 68, 68, 0.3);
+}
+
+.import-list-button {
+    background: #2c5aa0;
+    color: white;
+}
+
+.import-list-button:hover {
+    background: #1e3c72;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(44, 90, 160, 0.3);
+}
+
 .control-group label input[type="checkbox"] {
     margin-right: 8px;
     cursor: pointer;
@@ -215,8 +379,44 @@ header p {
     color: #2c5aa0;
     font-size: 1.8rem;
     flex: 1;
-    text-align: center;
     margin: 0;
+}
+
+.bracket-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.bracket-tabs {
+    display: flex;
+    gap: 5px;
+    background: #f0f0f0;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    background: transparent;
+    color: #666;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.tab-button:hover {
+    color: #2c5aa0;
+}
+
+.tab-button.active {
+    background: white;
+    color: #2c5aa0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .export-button {
@@ -244,6 +444,167 @@ header p {
 .export-button:disabled {
     opacity: 0.7;
     cursor: not-allowed;
+}
+
+/* Seeding view styles */
+.seeding-container {
+    overflow-y: auto;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    min-height: 400px;
+    max-height: 600px;
+}
+
+.seeding-view {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.seeding-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.seeding-header h3 {
+    color: #2c5aa0;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.seeding-header p {
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.seeding-list {
+    background: white;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.seeding-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    margin-bottom: 8px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    transition: all 0.2s;
+    cursor: move;
+}
+
+.seeding-item:hover {
+    border-color: #2c5aa0;
+    box-shadow: 0 2px 8px rgba(44, 90, 160, 0.1);
+}
+
+.seeding-item:last-child {
+    margin-bottom: 0;
+}
+
+.seeding-drag-handle {
+    color: #999;
+    font-size: 1.2rem;
+    cursor: grab;
+    user-select: none;
+}
+
+.seeding-drag-handle:active {
+    cursor: grabbing;
+}
+
+.seeding-seed {
+    min-width: 60px;
+}
+
+.seed-input {
+    width: 100%;
+    padding: 8px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-align: center;
+    color: #2c5aa0;
+    transition: border-color 0.2s;
+}
+
+.seed-input:hover {
+    border-color: #2c5aa0;
+}
+
+.seed-input:focus {
+    outline: none;
+    border-color: #2c5aa0;
+    box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+}
+
+.seeding-team-info {
+    flex: 1;
+}
+
+.seeding-team-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 1.05rem;
+    margin-bottom: 5px;
+}
+
+.seeding-team-details {
+    display: flex;
+    gap: 15px;
+    font-size: 0.9rem;
+}
+
+.seeding-record {
+    color: #666;
+}
+
+.seeding-conference {
+    color: #999;
+    font-style: italic;
+}
+
+.seeding-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 25px;
+}
+
+.apply-seeding-button,
+.reset-seeding-button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.apply-seeding-button {
+    background: linear-gradient(135deg, #2c5aa0 0%, #1e3c72 100%);
+    color: white;
+}
+
+.apply-seeding-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(44, 90, 160, 0.3);
+}
+
+.reset-seeding-button {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.reset-seeding-button:hover {
+    background: #e0e0e0;
+    color: #333;
 }
 
 .bracket-container {
@@ -393,6 +754,19 @@ header p {
     .controls-section {
         grid-template-columns: 1fr;
     }
+    
+    .bracket-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .bracket-section h2 {
+        text-align: center;
+    }
+    
+    .bracket-controls {
+        justify-content: center;
+    }
 }
 
 @media (max-width: 768px) {
@@ -406,6 +780,35 @@ header p {
     
     .bracket-round {
         min-width: 180px;
+    }
+    
+    .bracket-tabs {
+        width: 100%;
+    }
+    
+    .tab-button {
+        flex: 1;
+    }
+    
+    .seeding-actions {
+        flex-direction: column;
+    }
+    
+    .apply-seeding-button,
+    .reset-seeding-button {
+        width: 100%;
+    }
+    
+    .custom-list-controls {
+        flex-direction: column;
+    }
+    
+    .add-item-button {
+        width: 100%;
+    }
+    
+    .custom-list-actions {
+        flex-direction: column;
     }
 }
 
@@ -472,8 +875,14 @@ header p {
     
     header,
     .controls-section,
-    .export-button {
+    .export-button,
+    .bracket-tabs,
+    .seeding-container {
         display: none !important;
+    }
+    
+    .bracket-container {
+        display: block !important;
     }
     
     .container {

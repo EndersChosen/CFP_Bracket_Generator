@@ -3,9 +3,10 @@ let currentStandings = [];
 let conferences = [];
 let selectedConference = null;
 let allTeams = [];
-let currentViewMode = 'conference';
+let currentViewMode = 'top25';
 let manualSelectionMode = false;
 let selectedTeams = [];
+let customItems = [];
 
 // API Configuration
 const ESPN_FBS_API_URL = 'https://site.web.api.espn.com/apis/v2/sports/football/college-football/standings';
@@ -82,6 +83,9 @@ async function fetchStandings() {
             allTeams.sort((a, b) => a.rank - b.rank);
             
             populateConferenceDropdown();
+            
+            // Display top 25 by default
+            displayTop25();
         }
     } catch (error) {
         console.error('Error fetching standings:', error);
@@ -298,6 +302,8 @@ function refreshCurrentView() {
         displayTop25();
     } else if (currentViewMode === 'top2') {
         displayTop2FromEachConference();
+    } else if (currentViewMode === 'custom') {
+        displayCustomList();
     } else if (selectedConference) {
         displayStandings(selectedConference);
     }
@@ -354,22 +360,39 @@ function setupEventListeners() {
     const manualSelectionCheckbox = document.getElementById('manual-selection');
     const exportPdfBtn = document.getElementById('export-pdf-btn');
     
+    // Hide conference group on page load since top25 is default
+    conferenceGroup.style.display = 'none';
+    
     viewMode.addEventListener('change', (e) => {
         currentViewMode = e.target.value;
         
-        if (currentViewMode === 'top25') {
+        const standingsContainer = document.getElementById('standings-container');
+        const customListContainer = document.getElementById('custom-list-container');
+        
+        if (currentViewMode === 'custom') {
             conferenceGroup.style.display = 'none';
-            displayTop25();
-        } else if (currentViewMode === 'top2') {
-            conferenceGroup.style.display = 'none';
-            displayTop2FromEachConference();
+            standingsContainer.style.display = 'none';
+            customListContainer.style.display = 'block';
+            title.textContent = 'Custom List';
+            displayCustomList();
         } else {
-            conferenceGroup.style.display = 'block';
-            title.textContent = 'Current Standings';
-            if (selectedConference) {
-                displayStandings(selectedConference);
+            standingsContainer.style.display = 'block';
+            customListContainer.style.display = 'none';
+            
+            if (currentViewMode === 'top25') {
+                conferenceGroup.style.display = 'none';
+                displayTop25();
+            } else if (currentViewMode === 'top2') {
+                conferenceGroup.style.display = 'none';
+                displayTop2FromEachConference();
             } else {
-                document.getElementById('standings-container').innerHTML = '<p>Select a conference to view standings...</p>';
+                conferenceGroup.style.display = 'block';
+                title.textContent = 'Current Standings';
+                if (selectedConference) {
+                    displayStandings(selectedConference);
+                } else {
+                    standingsContainer.innerHTML = '<p>Select a conference to view standings...</p>';
+                }
             }
         }
     });
@@ -396,6 +419,28 @@ function setupEventListeners() {
     generateBtn.addEventListener('click', generateBracket);
     
     exportPdfBtn.addEventListener('click', exportToPDF);
+    
+    // Bracket tab switching
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('tab-button')) {
+            switchBracketTab(e.target.dataset.tab);
+        }
+    });
+    
+    // Custom list event listeners
+    const addCustomItemBtn = document.getElementById('add-custom-item-btn');
+    const customItemInput = document.getElementById('custom-item-input');
+    const clearCustomListBtn = document.getElementById('clear-custom-list-btn');
+    const importCustomListBtn = document.getElementById('import-custom-list-btn');
+    
+    addCustomItemBtn.addEventListener('click', addCustomItem);
+    customItemInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            addCustomItem();
+        }
+    });
+    clearCustomListBtn.addEventListener('click', clearCustomList);
+    importCustomListBtn.addEventListener('click', importCustomList);
 }
 
 // Generate bracket based on user selections
@@ -421,16 +466,31 @@ function generateBracket() {
             bracketTeams = selectedTeams.slice(0, teamCount);
         }
     } else {
-        if (currentStandings.length === 0) {
-            alert('Please select a view mode or conference first!');
-            return;
-        }
-        
-        bracketTeams = currentStandings.slice(0, teamCount);
-        
-        if (bracketTeams.length < teamCount) {
-            alert(`Only ${bracketTeams.length} teams available!`);
-            return;
+        // Check if using custom list
+        if (currentViewMode === 'custom') {
+            if (customItems.length === 0) {
+                alert('Please add items to your custom list first!');
+                return;
+            }
+            
+            bracketTeams = customItems.slice(0, teamCount);
+            
+            if (bracketTeams.length < teamCount) {
+                const proceed = confirm(`You have ${bracketTeams.length} items but want a ${teamCount}-team bracket. Use available items anyway?`);
+                if (!proceed) return;
+            }
+        } else {
+            if (currentStandings.length === 0) {
+                alert('Please select a view mode or conference first!');
+                return;
+            }
+            
+            bracketTeams = currentStandings.slice(0, teamCount);
+            
+            if (bracketTeams.length < teamCount) {
+                alert(`Only ${bracketTeams.length} teams available!`);
+                return;
+            }
         }
     }
     
@@ -453,12 +513,27 @@ function generateBracket() {
     // Create bracket structure
     const bracket = createBracketStructure(seededTeams, weekCount);
     
+    // Store seeded teams for seeding view
+    bracketTeamsSeeding = seededTeams.map((team, index) => ({
+        ...team,
+        seed: index + 1
+    }));
+    
     // Render bracket
     renderBracket(bracket, weekCount);
     
-    // Show export button
+    // Render seeding view
+    renderSeedingView();
+    
+    // Show export button and tabs
     const exportBtn = document.getElementById('export-pdf-btn');
     exportBtn.style.display = 'inline-block';
+    
+    const bracketTabs = document.getElementById('bracket-tabs');
+    bracketTabs.style.display = 'flex';
+    
+    // Switch to bracket view by default
+    switchBracketTab('bracket');
 }
 
 // Create bracket structure with proper tournament seeding
@@ -615,6 +690,8 @@ function generateSeedingOrder(teamCount) {
 
 // Store bracket state
 let bracketState = null;
+let bracketTeamsSeeding = [];
+let currentBracketView = 'bracket';
 
 // Render the bracket
 function renderBracket(bracket, weeks) {
@@ -811,6 +888,336 @@ function getRoundNames(weeks, totalTeams) {
 function showError(message) {
     const container = document.getElementById('standings-container');
     container.innerHTML = `<p style="color: red; padding: 20px;">${message}</p>`;
+}
+
+// Switch between bracket and seeding tabs
+function switchBracketTab(tab) {
+    currentBracketView = tab;
+    
+    const bracketContainer = document.getElementById('bracket-container');
+    const seedingContainer = document.getElementById('seeding-container');
+    const tabButtons = document.querySelectorAll('.tab-button');
+    
+    // Update active tab
+    tabButtons.forEach(btn => {
+        if (btn.dataset.tab === tab) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    // Show appropriate view
+    if (tab === 'bracket') {
+        bracketContainer.style.display = 'block';
+        seedingContainer.style.display = 'none';
+    } else {
+        bracketContainer.style.display = 'none';
+        seedingContainer.style.display = 'block';
+    }
+}
+
+// Render seeding view
+function renderSeedingView() {
+    const container = document.getElementById('seeding-container');
+    
+    if (!bracketTeamsSeeding || bracketTeamsSeeding.length === 0) {
+        container.innerHTML = '<p class="placeholder">No teams to display</p>';
+        return;
+    }
+    
+    container.innerHTML = `
+        <div class="seeding-view">
+            <div class="seeding-header">
+                <h3>Tournament Seeding</h3>
+                <p>Drag teams to reorder seeds, then regenerate bracket to apply changes</p>
+            </div>
+            <div class="seeding-list" id="seeding-list">
+                ${bracketTeamsSeeding.map((team, index) => `
+                    <div class="seeding-item" draggable="true" data-index="${index}">
+                        <div class="seeding-drag-handle">⋮⋮</div>
+                        <div class="seeding-seed">
+                            <input type="number" 
+                                   class="seed-input" 
+                                   value="${team.seed}" 
+                                   min="1" 
+                                   max="${bracketTeamsSeeding.length}"
+                                   data-index="${index}">
+                        </div>
+                        <div class="seeding-team-info">
+                            <div class="seeding-team-name">${team.team}</div>
+                            <div class="seeding-team-details">
+                                <span class="seeding-record">${team.record}</span>
+                                ${team.conference ? `<span class="seeding-conference">${team.conference}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="seeding-actions">
+                <button id="apply-seeding-btn" class="apply-seeding-button">Apply Seeding & Regenerate Bracket</button>
+                <button id="reset-seeding-btn" class="reset-seeding-button">Reset to Original</button>
+            </div>
+        </div>
+    `;
+    
+    // Setup drag and drop
+    setupSeedingDragDrop();
+    
+    // Setup seeding actions
+    document.getElementById('apply-seeding-btn').addEventListener('click', applySeedingChanges);
+    document.getElementById('reset-seeding-btn').addEventListener('click', resetSeeding);
+    
+    // Setup manual seed input changes
+    document.querySelectorAll('.seed-input').forEach(input => {
+        input.addEventListener('change', handleSeedInputChange);
+    });
+}
+
+// Setup drag and drop for seeding
+function setupSeedingDragDrop() {
+    const seedingList = document.getElementById('seeding-list');
+    let draggedItem = null;
+    
+    seedingList.addEventListener('dragstart', (e) => {
+        if (e.target.classList.contains('seeding-item')) {
+            draggedItem = e.target;
+            e.target.style.opacity = '0.5';
+        }
+    });
+    
+    seedingList.addEventListener('dragend', (e) => {
+        if (e.target.classList.contains('seeding-item')) {
+            e.target.style.opacity = '1';
+        }
+    });
+    
+    seedingList.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(seedingList, e.clientY);
+        if (afterElement == null) {
+            seedingList.appendChild(draggedItem);
+        } else {
+            seedingList.insertBefore(draggedItem, afterElement);
+        }
+    });
+    
+    seedingList.addEventListener('drop', (e) => {
+        e.preventDefault();
+        updateSeedingOrder();
+    });
+}
+
+// Get element after drag position
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.seeding-item:not(.dragging)')];
+    
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+// Update seeding order after drag
+function updateSeedingOrder() {
+    const items = document.querySelectorAll('.seeding-item');
+    const newOrder = [];
+    
+    items.forEach((item, index) => {
+        const oldIndex = parseInt(item.dataset.index);
+        newOrder.push(bracketTeamsSeeding[oldIndex]);
+    });
+    
+    // Update seeds
+    bracketTeamsSeeding = newOrder.map((team, index) => ({
+        ...team,
+        seed: index + 1
+    }));
+    
+    // Re-render to update seed numbers
+    renderSeedingView();
+}
+
+// Handle manual seed input changes
+function handleSeedInputChange(e) {
+    const index = parseInt(e.target.dataset.index);
+    let newSeed = parseInt(e.target.value);
+    
+    // Validate seed
+    if (isNaN(newSeed) || newSeed < 1 || newSeed > bracketTeamsSeeding.length) {
+        e.target.value = bracketTeamsSeeding[index].seed;
+        return;
+    }
+    
+    // Move team to new position
+    const team = bracketTeamsSeeding[index];
+    bracketTeamsSeeding.splice(index, 1);
+    bracketTeamsSeeding.splice(newSeed - 1, 0, team);
+    
+    // Update all seeds
+    bracketTeamsSeeding = bracketTeamsSeeding.map((t, i) => ({
+        ...t,
+        seed: i + 1
+    }));
+    
+    // Re-render
+    renderSeedingView();
+}
+
+// Apply seeding changes and regenerate bracket
+function applySeedingChanges() {
+    const teamCount = parseInt(document.getElementById('team-count').value);
+    const weekCount = parseInt(document.getElementById('week-count').value);
+    
+    // Use current seeding order
+    const seededTeams = bracketTeamsSeeding.slice(0, teamCount);
+    
+    // Create bracket structure
+    const bracket = createBracketStructure(seededTeams, weekCount);
+    
+    // Render bracket
+    renderBracket(bracket, weekCount);
+    
+    // Switch to bracket view
+    switchBracketTab('bracket');
+    
+    // Show success message
+    alert('Bracket updated with new seeding!');
+}
+
+// Reset seeding to original
+function resetSeeding() {
+    if (confirm('Reset seeding to original order?')) {
+        // Regenerate bracket with original settings
+        generateBracket();
+    }
+}
+
+// Display custom list
+function displayCustomList() {
+    const container = document.getElementById('custom-items-list');
+    
+    if (customItems.length === 0) {
+        container.innerHTML = '<p class="placeholder-small">Add items to create your custom bracket</p>';
+        return;
+    }
+    
+    container.innerHTML = customItems.map((item, index) => {
+        const isSelected = selectedTeams.some(t => t.team === item.team);
+        const selectableClass = manualSelectionMode ? 'selectable' : '';
+        const selectedClass = isSelected ? 'selected' : '';
+        
+        return `
+            <div class="custom-item ${selectableClass} ${selectedClass}" 
+                 data-team-index="${index}"
+                 ${manualSelectionMode ? 'onclick="toggleTeamSelection(this)"' : ''}>
+                <div class="custom-item-rank">${item.rank}</div>
+                <div class="custom-item-name">${item.team}</div>
+                <button class="remove-item-btn" onclick="removeCustomItem(${index}); event.stopPropagation();">×</button>
+            </div>
+        `;
+    }).join('');
+    
+    // Update currentStandings for bracket generation
+    currentStandings = customItems;
+}
+
+// Add custom item
+function addCustomItem() {
+    const input = document.getElementById('custom-item-input');
+    const itemName = input.value.trim();
+    
+    if (!itemName) {
+        alert('Please enter an item name!');
+        return;
+    }
+    
+    // Check for duplicates
+    if (customItems.some(item => item.team.toLowerCase() === itemName.toLowerCase())) {
+        alert('This item already exists in your list!');
+        return;
+    }
+    
+    // Add item
+    customItems.push({
+        rank: customItems.length + 1,
+        team: itemName,
+        shortName: itemName,
+        record: '',
+        stats: []
+    });
+    
+    // Clear input
+    input.value = '';
+    input.focus();
+    
+    // Update display
+    displayCustomList();
+}
+
+// Remove custom item
+function removeCustomItem(index) {
+    customItems.splice(index, 1);
+    
+    // Renumber remaining items
+    customItems = customItems.map((item, i) => ({
+        ...item,
+        rank: i + 1
+    }));
+    
+    // Update display
+    displayCustomList();
+}
+
+// Clear custom list
+function clearCustomList() {
+    if (customItems.length === 0) return;
+    
+    if (confirm('Clear all items from your custom list?')) {
+        customItems = [];
+        displayCustomList();
+    }
+}
+
+// Import custom list
+function importCustomList() {
+    const input = prompt('Paste your list of items (one per line):');
+    
+    if (!input) return;
+    
+    const items = input.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+    
+    if (items.length === 0) {
+        alert('No valid items found!');
+        return;
+    }
+    
+    // Add items
+    items.forEach(itemName => {
+        // Check for duplicates
+        if (!customItems.some(item => item.team.toLowerCase() === itemName.toLowerCase())) {
+            customItems.push({
+                rank: customItems.length + 1,
+                team: itemName,
+                shortName: itemName,
+                record: '',
+                stats: []
+            });
+        }
+    });
+    
+    // Update display
+    displayCustomList();
+    
+    alert(`Successfully imported ${items.length} items!`);
 }
 
 // Initialize when DOM is ready

@@ -21,8 +21,9 @@
                     <label for="view-mode">View Mode:</label>
                     <select id="view-mode">
                         <option value="conference">Conference Standings</option>
-                        <option value="top25">Top 25 Rankings</option>
+                        <option value="top25" selected>Top 25 Rankings</option>
                         <option value="top2">Top 2 From Each Conference</option>
+                        <option value="custom">Custom List</option>
                     </select>
                 </div>
 
@@ -78,9 +79,22 @@
             </div>
 
             <div class="teams-section">
-                <h2 id="standings-title">Current Standings</h2>
+                <h2 id="standings-title">Top 25 Rankings</h2>
                 <div id="standings-container" class="standings-list">
-                    <p>Select a view mode to get started...</p>
+                    <p>Loading rankings...</p>
+                </div>
+                <div id="custom-list-container" style="display: none;">
+                    <div class="custom-list-controls">
+                        <input type="text" id="custom-item-input" placeholder="Enter item name (e.g., Team Name, Player, etc.)" />
+                        <button id="add-custom-item-btn" class="add-item-button">+ Add Item</button>
+                    </div>
+                    <div id="custom-items-list" class="custom-items-list">
+                        <p class="placeholder-small">Add items to create your custom bracket</p>
+                    </div>
+                    <div class="custom-list-actions">
+                        <button id="clear-custom-list-btn" class="clear-list-button">Clear All</button>
+                        <button id="import-custom-list-btn" class="import-list-button">Import List</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -88,12 +102,21 @@
         <div class="bracket-section">
             <div class="bracket-header">
                 <h2>Tournament Bracket</h2>
-                <button id="export-pdf-btn" class="export-button" style="display: none;">
-                    📄 Export to PDF
-                </button>
+                <div class="bracket-controls">
+                    <div class="bracket-tabs" id="bracket-tabs" style="display: none;">
+                        <button class="tab-button active" data-tab="bracket">Bracket View</button>
+                        <button class="tab-button" data-tab="seeding">Seeding View</button>
+                    </div>
+                    <button id="export-pdf-btn" class="export-button" style="display: none;">
+                        📄 Export to PDF
+                    </button>
+                </div>
             </div>
             <div id="bracket-container" class="bracket-container">
                 <p class="placeholder">Configure settings above and click "Generate Bracket" to create your playoff bracket</p>
+            </div>
+            <div id="seeding-container" class="seeding-container" style="display: none;">
+                <!-- Seeding view will be populated here -->
             </div>
         </div>
     </div>
