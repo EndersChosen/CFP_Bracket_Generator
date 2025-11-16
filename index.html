@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Football Playoff Bracket Creator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏈 College Football Playoff Bracket Creator</h1>
+            <p>Create custom playoff brackets using live ESPN standings data</p>
+        </header>
+
+        <div class="controls-section">
+            <div class="control-panel">
+                <h2>Configure Bracket</h2>
+                
+                <div class="control-group">
+                    <label for="view-mode">View Mode:</label>
+                    <select id="view-mode">
+                        <option value="conference">Conference Standings</option>
+                        <option value="top25">Top 25 Rankings</option>
+                        <option value="top2">Top 2 From Each Conference</option>
+                    </select>
+                </div>
+
+                <div class="control-group" id="conference-group">
+                    <label for="conference-select">Select Conference:</label>
+                    <select id="conference-select">
+                        <option value="">Loading conferences...</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="team-count">Number of Teams:</label>
+                    <select id="team-count">
+                        <option value="4">4 Teams</option>
+                        <option value="8">8 Teams</option>
+                        <option value="12" selected>12 Teams</option>
+                        <option value="16">16 Teams</option>
+                        <option value="32">32 Teams</option>
+                        <option value="46">46 Teams (with byes)</option>
+                        <option value="64">64 Teams</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="week-count">Number of Weeks:</label>
+                    <select id="week-count">
+                        <option value="2">2 Weeks</option>
+                        <option value="3">3 Weeks</option>
+                        <option value="4" selected>4 Weeks</option>
+                        <option value="5">5 Weeks</option>
+                        <option value="6">6 Weeks</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="seeding-method">Seeding Method:</label>
+                    <select id="seeding-method">
+                        <option value="standings">Current Standings</option>
+                        <option value="pointDifferential">Point Differential</option>
+                        <option value="wins">Total Wins</option>
+                        <option value="winPercent">Win Percentage</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="manual-selection">
+                        Enable Manual Team Selection
+                    </label>
+                </div>
+
+                <button id="generate-btn" class="generate-button">Generate Bracket</button>
+            </div>
+
+            <div class="teams-section">
+                <h2 id="standings-title">Current Standings</h2>
+                <div id="standings-container" class="standings-list">
+                    <p>Select a view mode to get started...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bracket-section">
+            <h2>Tournament Bracket</h2>
+            <div id="bracket-container" class="bracket-container">
+                <p class="placeholder">Configure settings above and click "Generate Bracket" to create your playoff bracket</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
